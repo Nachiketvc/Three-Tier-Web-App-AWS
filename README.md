@@ -50,3 +50,6 @@ User -> CloudFront -> S3 (Static Website)
 
 🚀 **Now your serverless three-tier web app is live!**
 
+![Final Output](Final-Output.png)
+
+
