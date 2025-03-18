@@ -1,6 +1,5 @@
 # Three-Tier-Web-App-AWS
 
-# Three-Tier Web App on AWS
 
 ## Overview
 This project demonstrates a serverless three-tier architecture on AWS, using:
