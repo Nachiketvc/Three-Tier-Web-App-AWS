@@ -1,0 +1,66 @@
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { DynamoDBDocumentClient, GetCommand } from "@aws-sdk/lib-dynamodb";
+
+const ddbClient = new DynamoDBClient({ region: process.env.AWS_REGION || "ap-south-1" });
+const ddb = DynamoDBDocumentClient.from(ddbClient);
+
+export async function handler(event) {
+    try {
+        const userId = event.queryStringParameters?.userId;
+
+        if (!userId) {
+            return {
+                statusCode: 400,
+                headers: {
+                    "Content-Type": "application/json",
+                    "Access-Control-Allow-Origin": "https://d2qf3hqsmmsob4.cloudfront.net",
+                },
+                body: JSON.stringify({ message: "User ID is required" }),
+            };
+        }
+
+        const params = {
+            TableName: "UserData", // Ensure this matches your actual table name
+            Key: { userId },
+        };
+
+        const { Item } = await ddb.send(new GetCommand(params));
+
+        if (!Item) {
+            return {
+                statusCode: 404,
+                headers: {
+                    "Content-Type": "application/json",
+                    "Access-Control-Allow-Origin": "https://d2qf3hqsmmsob4.cloudfront.net",
+                },
+                body: JSON.stringify({ message: "No user data found" }),
+            };
+        }
+
+        // Modify response to rename "userId" to "id"
+        const responseData = {
+            id: Item.userId, // Rename userId to id
+            name: Item.name,
+            email: Item.email,
+        };
+
+        return {
+            statusCode: 200,
+            headers: {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "https://d2qf3hqsmmsob4.cloudfront.net",
+            },
+            body: JSON.stringify(responseData),
+        };
+    } catch (error) {
+        console.error("DynamoDB Error:", error);
+        return {
+            statusCode: 500,
+            headers: {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "https://d2qf3hqsmmsob4.cloudfront.net",
+            },
+            body: JSON.stringify({ message: "Internal Server Error", error: error.message }),
+        };
+    }
+}
